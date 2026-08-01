@@ -1,0 +1,45 @@
+Task Overview:
+You are an SQL expert with advanced database knowledge. You are given an SQLite database schema (including helpful column comments and sample data) and an SQLite query skeleton whose tables, columns, and values are replaced by <TABLE>, <COLUMN>, and <LITERAL>. Your task is to fill the placeholders with concrete tables, columns, and values from the database schema, producing a valid and meaningful SQLite query.
+
+Database Engine:
+SQLite
+
+Database Schema:
+{DATABASE_SCHEMA}
+This schema describes the database's structure, including tables, columns, primary keys, foreign keys, and any relevant relationships or constraints.
+
+Instructions:
+- <TABLE> must be replaced by one real table in the database.
+- <COLUMN> must be replaced by one real column in the database.
+- <LITERAL> must be replaced by a concrete value, number, date, string, or other valid SQLite literal related to the corresponding column.
+- Do not invent tables or columns that are not present in the schema.
+- Prefer values that are likely to produce a non-empty result. Use the sample values in the schema when useful.
+- The SQL should be meaningful and should correspond to a realistic natural language question.
+- You may make small local adjustments to the skeleton if required by the database schema, but do not make large structural changes.
+- Return only one valid SQLite query.
+
+Demonstrations:
+Skeleton: SELECT <COLUMN> FROM <TABLE> INNER JOIN <TABLE> ON <COLUMN> = <COLUMN> WHERE <COLUMN> = <LITERAL> AND <COLUMN> = <LITERAL>
+SQL: <answer>SELECT T1.Description FROM Airports AS T1 INNER JOIN Airlines AS T2 ON T1.Code = T2.ORIGIN WHERE T2.FL_DATE = '2018/8/15' AND T2.DEP_DELAY > 0</answer>
+
+Skeleton: SELECT <COLUMN> FROM <TABLE> INNER JOIN <TABLE> ON <COLUMN> = <COLUMN> WHERE <COLUMN> = <LITERAL>
+SQL: <answer>SELECT T2.name FROM Recipe AS T1 INNER JOIN Quantity AS T3 ON T1.recipe_id = T3.recipe_id INNER JOIN Ingredient AS T2 ON T2.ingredient_id = T3.ingredient_id WHERE T1.title = 'Apricot Yogurt Parfaits'</answer>
+
+Skeleton: SELECT CAST(<COLUMN> AS FLOAT) * <LITERAL> / <COLUMN> FROM <TABLE> INNER JOIN <TABLE> ON <COLUMN> = <COLUMN> WHERE <COLUMN> = <LITERAL>
+SQL: <answer>SELECT CAST(T1.score AS FLOAT) * 10 / 100 FROM inspections AS T1 INNER JOIN businesses AS T2 ON T1.business_id = T2.business_id WHERE T2.name = 'The Waterfront Restaurant'</answer>
+
+Skeleton: SELECT COUNT(*) FROM <TABLE> INNER JOIN <TABLE> ON <COLUMN> = <COLUMN> WHERE <COLUMN> = <LITERAL>
+SQL: <answer>SELECT COUNT(*) FROM inspections AS T1 INNER JOIN businesses AS T2 ON T1.business_id = T2.business_id WHERE T2.city = 'SAN FRANCISCO' AND T1.type = 'Routine - Unscheduled'</answer>
+
+{DEMONSTRATIONS}
+
+Output Format:
+Return the SQL query enclosed in <answer> and </answer> tags.
+
+For example:
+<answer>
+SELECT AVG(rating_score) FROM movies
+</answer>
+
+Skeleton: {SKELETON}
+SQL:

@@ -1,0 +1,51 @@
+You are an expert SQL error analyst. Your job is to diagnose errors in an incorrect SQL response by comparing it against the correct solution.
+
+You are given the following:
+- A context (database schema and question)
+- A correct SQL solution (reference)
+- An incorrect SQL response from the model
+
+Here is the error taxonomy for categorization:
+
+{taxonomy}
+
+Your task:
+
+1. Compare the incorrect response against the correct solution and identify ALL major errors that led to the incorrect answer. A response may have multiple errors.
+
+2. For each error identified:
+   - Provide a brief error_summary describing the model's reasoning weakness (focus on model thinking rather than technical execution)
+   - Assign the single most relevant category from the taxonomy
+
+3. **IMPORTANT: Order the errors by severity/importance** — place the most critical structural or functional errors first (e.g., missing subqueries, wrong aggregate functions, missing clauses), followed by less severe errors (e.g., wrong attribute, wrong value). The first error in the list should be the primary reason for failure.
+
+If no error is found, return an empty list for final_answer.
+
+Output the result in the following JSON format:
+{{
+  "final_answer": [
+    {{
+      "error_summary": "The model failed to use a window function for ranking, instead using a simple ORDER BY + LIMIT which gives wrong results for ties.",
+      "category": "Window Functions"
+    }},
+    {{
+      "error_summary": "The model selected the wrong column 'name' instead of 'full_name' from the users table.",
+      "category": "Attribute Mismatch"
+    }}
+  ]
+}}
+
+Use the following inputs:
+
+Context:
+{input_text}
+
+Correct SQL:
+{correct_answer}
+
+Incorrect SQL:
+{output_text}
+
+Diagnose the errors. Be specific and structured. Output ONLY the JSON.
+
+Assessment:

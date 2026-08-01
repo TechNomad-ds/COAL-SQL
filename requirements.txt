@@ -1,0 +1,15 @@
+vllm==0.8.3
+tensordict==0.6.2
+torch==2.6.0
+# flash-attn==2.7.3
+cachetools
+transformers==4.57.6
+func_timeout
+setuptools==80.9.0
+typer==0.21.0
+litellm
+tenacity
+faiss-cpu==1.13.2
+polars==1.40.1
+sql_metadata==2.20.0
+sqlglot==30.11.0

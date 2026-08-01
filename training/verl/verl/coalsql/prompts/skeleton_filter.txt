@@ -1,0 +1,35 @@
+You are an expert SQL analyst. Your task is to determine which SQL skeleton templates could potentially involve a specific SQL construct/error type.
+
+**Target Error Type:** {error_type_name}
+**Error Description:** {error_type_description}
+
+Below are SQL skeleton templates (abstracted SQL patterns). For each skeleton, determine whether the SQL pattern **could plausibly require** the construct related to the target error type.
+
+A skeleton is RELEVANT if:
+- The SQL pattern contains or implies the use of the target construct (e.g., window functions, subqueries, aggregations)
+- Or the pattern structure naturally leads to using that construct
+
+A skeleton is IRRELEVANT if:
+- The SQL pattern is too simple or structurally incompatible with the target construct
+- It's impossible or highly unlikely for queries matching this pattern to exercise the target skill
+
+**Skeleton Templates:**
+
+{skeletons}
+
+**Instructions:**
+1. For each skeleton, assess if it could plausibly involve "{error_type_name}".
+2. Return ONLY the IDs of relevant skeletons.
+3. Be inclusive rather than exclusive — if there's reasonable doubt, include it.
+
+Output ONLY the following JSON format:
+{{
+  "relevant_ids": [1, 3, 5]
+}}
+
+If no skeletons are relevant, return:
+{{
+  "relevant_ids": []
+}}
+
+Assessment:

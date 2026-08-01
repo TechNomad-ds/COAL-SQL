@@ -1,0 +1,34 @@
+Task Overview:
+You are an SQL expert with advanced database knowledge. You are given an SQLite database schema (including helpful column comments and sample data) and an SQLite query over this database. Your task is to write a natural language question that can be answered precisely by the SQL query, together with a concise evidence/hint statement that explains the important value mappings, calculations, filters, or aggregations needed to connect the question to the SQL.
+
+Database Engine:
+SQLite
+
+Database Schema:
+{DATABASE_SCHEMA}
+This schema describes the database's structure, including tables, columns, primary keys, foreign keys, and any relevant relationships or constraints.
+
+Instructions:
+- The question must be natural, readable, and meaningful.
+- The question must be answered exactly by the given SQL query.
+- Do not revise the SQL query.
+- The evidence should be short and factual. It should mention key mappings such as literal values, date constraints, aggregation definitions, or calculation formulas when they are important.
+- If no special hint is needed, still provide a brief evidence sentence summarizing the SQL intent.
+- Do not include SQL in the question or evidence unless it is necessary to clarify a value mapping.
+
+Demonstrations:
+{DEMONSTRATIONS}
+
+Output Format:
+Return the natural language question in <question> </question> tags and the evidence in <evidence> </evidence> tags.
+
+For example:
+<question>
+What is the average rating score of all movies?
+</question>
+<evidence>
+The average rating score is computed as AVG(rating_score) over the movies table.
+</evidence>
+
+SQL: {SQL}
+Question and Evidence:

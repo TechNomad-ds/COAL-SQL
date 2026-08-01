@@ -1,0 +1,157 @@
+[
+  {
+    "id": 1,
+    "name": "Attribute Mismatch",
+    "description": "Wrong attribute selection. The selected attribute does not match the required attribute for the query."
+  },
+  {
+    "id": 2,
+    "name": "Attribute Redundancy",
+    "description": "Unnecessary attributes included in the SELECT clause or other parts of the query."
+  },
+  {
+    "id": 3,
+    "name": "Attribute Missing",
+    "description": "Required attributes not included in the query, missing columns that should be selected or used."
+  },
+  {
+    "id": 4,
+    "name": "Table Mismatch",
+    "description": "Wrong table selection. The query uses an incorrect table for retrieving data."
+  },
+  {
+    "id": 5,
+    "name": "Table Redundancy",
+    "description": "Unnecessary tables included in the FROM clause or JOINs."
+  },
+  {
+    "id": 6,
+    "name": "Table Missing",
+    "description": "Required tables not included in the query, missing tables that should be joined."
+  },
+  {
+    "id": 7,
+    "name": "Join Condition Mismatch",
+    "description": "The join condition between tables is incorrect. If the [attribute][operator][attribute] is incorrectly chosen, the error is classified here rather than as 'Attribute Mismatch'."
+  },
+  {
+    "id": 8,
+    "name": "Join Type Mismatch",
+    "description": "Wrong join type used, e.g., LEFT JOIN when INNER JOIN was needed, or vice versa."
+  },
+  {
+    "id": 9,
+    "name": "Value Mismatch",
+    "description": "Incorrect values used in WHERE conditions or other parts of the query."
+  },
+  {
+    "id": 10,
+    "name": "Data Format Mismatch",
+    "description": "Wrong data type or format used, e.g., string instead of number, or incorrect date format."
+  },
+  {
+    "id": 11,
+    "name": "Comparison Operator Mismatch",
+    "description": "Wrong comparison operator used in conditions, e.g., '=' when '!=' was needed, or '>' instead of '<'."
+  },
+  {
+    "id": 12,
+    "name": "Logical Operator Mismatch",
+    "description": "Wrong logical operator (e.g., AND when OR needed) or incorrect operator precedence causing logic errors."
+  },
+  {
+    "id": 13,
+    "name": "Explicit Condition Missing",
+    "description": "Required conditions not included in the WHERE clause or other filtering clauses."
+  },
+  {
+    "id": 14,
+    "name": "Explicit Condition Mismatch",
+    "description": "Wrong conditions where two of [attribute], [operator], [value] are incorrect. If only one is wrong, it should be classified as attribute, value, or operator error."
+  },
+  {
+    "id": 15,
+    "name": "Explicit Condition Redundancy",
+    "description": "Unnecessary conditions included that do not contribute to the correct result."
+  },
+  {
+    "id": 16,
+    "name": "Implicit Condition Missing",
+    "description": "Missing implicit conditions such as IS NOT NULL or other assumptions about data."
+  },
+  {
+    "id": 17,
+    "name": "Aggregate Functions",
+    "description": "Incorrect use of aggregate functions like SUM, AVG, COUNT, MAX, MIN."
+  },
+  {
+    "id": 18,
+    "name": "Window Functions",
+    "description": "Incorrect use of window functions like OVER, PARTITION BY, ROW_NUMBER, RANK."
+  },
+  {
+    "id": 19,
+    "name": "Date/Time Functions",
+    "description": "Incorrect use of date/time functions like JULIANDAY, strftime, DATE, DATETIME."
+  },
+  {
+    "id": 20,
+    "name": "Conversion Functions",
+    "description": "Incorrect use of type conversion functions like CAST, CONVERT."
+  },
+  {
+    "id": 21,
+    "name": "Math Functions",
+    "description": "Incorrect use of mathematical functions like ROUND, ABS, CEIL, FLOOR."
+  },
+  {
+    "id": 22,
+    "name": "String Functions",
+    "description": "Incorrect use of string functions like SUBSTR, LENGTH, UPPER, LOWER, TRIM."
+  },
+  {
+    "id": 23,
+    "name": "Conditional Functions",
+    "description": "Incorrect use of conditional functions like IIF, CASE WHEN, COALESCE, NULLIF."
+  },
+  {
+    "id": 24,
+    "name": "Clause Missing",
+    "description": "Required clauses not included, such as GROUP BY, ORDER BY, HAVING, LIMIT."
+  },
+  {
+    "id": 25,
+    "name": "Clause Redundancy",
+    "description": "Unnecessary clauses included, such as unneeded GROUP BY, ORDER BY, or HAVING."
+  },
+  {
+    "id": 26,
+    "name": "Subquery Missing",
+    "description": "Required subquery not included where a nested query was needed."
+  },
+  {
+    "id": 27,
+    "name": "Subquery Mismatch",
+    "description": "Incorrect subquery logic, wrong subquery structure or conditions."
+  },
+  {
+    "id": 28,
+    "name": "Partial Query",
+    "description": "The error SQL query is a partial query that contributes to the correct SQL query, incomplete implementation."
+  },
+  {
+    "id": 29,
+    "name": "ASC/DESC",
+    "description": "Incorrect sorting order specified, ASC instead of DESC or vice versa."
+  },
+  {
+    "id": 30,
+    "name": "DISTINCT",
+    "description": "Incorrect use of DISTINCT keyword - either missing when needed or present when unnecessary."
+  },
+  {
+    "id": 31,
+    "name": "Other",
+    "description": "Major logical errors requiring complete rewrite, or errors that do not fit into the above categories."
+  }
+]

@@ -1,0 +1,31 @@
+You are an expert SQL training curriculum designer. Your task is to select practice SQL queries that can effectively train a model to overcome a specific type of SQL error.
+
+**Target Error Type:** {error_type_name}
+**Error Description:** {error_type_description}
+
+Below are candidate SQL queries (ground-truth solutions). Your job is to identify which queries **actively use** the SQL construct/pattern related to the target error type.
+
+A query is a GOOD match if it **meaningfully uses** the construct related to the target error type (e.g., if the target error is "Window Functions", the SQL should contain window functions like ROW_NUMBER(), RANK(), OVER(), etc.).
+
+A query is a BAD match if it does NOT use or only trivially mentions the relevant construct.
+
+**Candidate SQL Queries:**
+
+{candidates}
+
+**Instructions:**
+1. For each candidate, check if its SQL meaningfully uses the construct related to "{error_type_name}".
+2. Return the IDs of matching candidates, ordered by relevance (best matches first).
+3. Be selective — only include queries that clearly exercise the target skill.
+
+Output ONLY the following JSON format:
+{{
+  "selected_ids": [3, 7, 12, 1, 15]
+}}
+
+If no candidates match well, return:
+{{
+  "selected_ids": []
+}}
+
+Assessment:
