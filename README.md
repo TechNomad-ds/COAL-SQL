@@ -1,154 +1,105 @@
-<h1 align="center">COAL-SQL</h1>
+<h1 align="center">COAL-SQL: Coverage-Guided Augmentation and Failure-Driven Learning for Text-to-SQL Post-Training</h1>
 
-<p align="center">
-  <strong>Coverage-Guided Augmentation and Failure-Driven Learning<br>
-  for Text-to-SQL Post-Training</strong>
-</p>
-
-
-<p align="center">
-  <a href="https://arxiv.org/abs/2609.20842">Paper</a> ·
-  <a href="#overview">Overview</a> ·
-  <a href="#installation">Installation</a> ·
-  <a href="#usage">Usage</a> ·
-  <a href="#citation">Citation</a>
-</p>
-
-**COAL-SQL** is a unified post-training framework that improves Text-to-SQL through **Co**verage-Guided **A**ugmentation and Failure-Driven **L**earning. It augments seed data with complementary SQL structures and uses failures observed during training to guide corrective supervision and additional practice.
-
-**COAL-SQL achieves 64.9% execution accuracy on the BIRD development set with approximately 12.6K distinct post-training examples.**
+COAL-SQL is a unified post-training framework for Text-to-SQL that combines **Co**verage-Guided **A**ugmentation with Failure-Driven **L**earning. It targets two complementary challenges in adapting open-source LLMs to a target Text-to-SQL task: (1) constructing training data that covers the SQL structures the task requires, and (2) enabling the model to actually acquire those capabilities during optimization.
 
 ## Overview
 
-![COAL-SQL framework: Coverage-Guided Augmentation and Failure-Driven Learning](figures/overview.png)
+![Overview](figures/overview.png)
 
-COAL-SQL addresses two complementary challenges: covering the SQL structures required by the target task and helping the model learn to solve them.
+Effective Text-to-SQL post-training needs both adequate coverage of the SQL capabilities the target task requires and an optimization process that lets the model acquire them. COAL-SQL addresses these from the data and learning sides:
 
-### Coverage-Guided Augmentation (CGA)
+- **Coverage-Guided Augmentation** expands an existing seed set according to its structural coverage. It abstracts SQL queries into schema-independent *skeletons*, applies metric *K*-center selection with the seed skeletons fixed as existing centers to favor complementary structures, and instantiates the selected skeletons on the target training databases as verified question–SQL examples.
 
-CGA expands a seed training set with structurally complementary examples:
+- **Failure-Driven Learning** supplements GRPO with supervision derived from *Solve-None* examples (those for which no sampled rollout is execution-correct). It uses step-level expansion to construct corrective chain-of-thought traces for newly observed failures, and epoch-level expansion to build structure-related practice from failures accumulated during training.
 
-1. **Abstract SQL structures.** Convert seed queries and an external SQL collection into schema-independent SQL *skeletons*.
-2. **Select complementary skeletons.** Apply metric *K*-center selection, keeping seed skeletons fixed as existing centers, to prioritize structures that complement the seed set.
-3. **Synthesize verified examples.** Instantiate the selected skeletons on the target training databases and generate verified question–SQL pairs.
+With only ~12.6K distinct post-training examples, COAL-SQL reaches 64.9% execution accuracy on the BIRD development set and outperforms comparable-scale baselines.
 
-### Failure-Driven Learning (FDL)
+## Repository Structure
 
-FDL supplements GRPO with supervision and practice derived from **Solve-None** examples—training examples for which none of the sampled rollouts is execution-correct:
+```
+COAL-SQL/
+├── core/                 # Shared utilities: LLM client, parallel helpers, SQL execution rewards
+│   └── reward/           # Text-to-SQL execution/format reward functions
+├── data_augmentation/    # Coverage-Guided Augmentation (skeleton pool, K-center selection, synthesis)
+├── sql_retrieval/         # SQL skeleton retrieval infrastructure (skeleton extraction, FAISS index)
+├── training/             # Failure-Driven Learning + GRPO training
+│   └── verl/             # verl framework; our code lives in verl/verl/coalsql/
+├── scripts/              # Training launch script (train_coalsql.sh)
+├── figures/              # Figures used in this README
+├── requirements.txt
+└── setup.py
+```
 
-- **Step-level expansion:** Construct corrective chain-of-thought traces for newly observed failures.
-- **Epoch-level expansion:** Generate structurally related practice examples from failures accumulated during training.
+Module-level details:
 
-Together, CGA and FDL connect structural data coverage with learning from the model's observed failures.
+- Data augmentation: [`data_augmentation/README.md`](data_augmentation/README.md)
+- Skeleton retrieval: [`sql_retrieval/README.md`](sql_retrieval/README.md)
 
-## Installation
-
-Run the following commands from the repository root:
+## 🚀 Installation
 
 ```bash
 conda create -n coalsql python=3.10
 conda activate coalsql
 
-# Install COAL-SQL dependencies and package
+# COAL-SQL dependencies and package
 pip install -r requirements.txt
 pip install -e .
 
-# Install the bundled verl training backend
+# verl training backend
 cd training/verl
 pip install -e .
 cd ../..
 ```
 
-If installing `flash-attn` fails, use a prebuilt wheel compatible with your CUDA and PyTorch versions from the [FlashAttention releases](https://github.com/Dao-AILab/flash-attention/releases).
+If you run into issues installing `flash-attn`, install a prebuilt wheel that matches your CUDA/torch versions from the [flash-attention releases](https://github.com/Dao-AILab/flash-attention/releases).
 
 ### Configuration
 
-Copy the environment template and edit it for your setup:
+Copy the environment template and fill in your paths:
 
 ```bash
 cp .env.example .env
 ```
 
-Configure the following in `.env`:
-
-| Configuration             | Purpose                                                     |
-| ------------------------- | ----------------------------------------------------------- |
-| Model path                | Model used for post-training                                |
-| `SQL_DATASET_DIR_TRAIN`   | Training database directory used by the execution reward    |
-| `SQL_DATASET_DIR_DEV`     | Development database directory used by the execution reward |
-| `SQL_DATASET_DIR_QB`      | Additional database directory used by the execution reward  |
-| Training result directory | Output location for training results                        |
-| LLM API settings          | API used by error-aware retrieval                           |
-
-See `.env.example` for the exact variable names and expected values. Update the data paths and options in the pipeline and training scripts as needed.
+`.env` provides the model path, database directories used by the execution reward (`SQL_DATASET_DIR_DEV` / `SQL_DATASET_DIR_TRAIN` / `SQL_DATASET_DIR_QB`), the training result directory, and the LLM API used by error-aware retrieval.
 
 ## Usage
 
-Run all commands below from the repository root.
+### 1. Data Preparation
 
-### 1. Prepare the data
+COAL-SQL operates on a target Text-to-SQL task (e.g. BIRD) plus a **user-provided external SQL collection** that serves as the augmentation source. You need:
 
-COAL-SQL requires a target Text-to-SQL task, such as BIRD, and a user-provided external SQL collection for augmentation.
+- A **seed training set** in parquet format (question, gold SQL, `db_id`), used for GRPO and as the reference for structural coverage.
+- The associated **databases** (SQLite), used by the execution reward.
+- An **external SQL collection** for augmentation. It can come from any Text-to-SQL corpus; each record needs at least an executable gold SQL (and optionally `db_id` / `question`). See [`sql_retrieval/README.md`](sql_retrieval/README.md) for the expected format.
 
-| Input                   | Requirements                                                 | Purpose                                         |
-| ----------------------- | ------------------------------------------------------------ | ----------------------------------------------- |
-| Seed training set       | Parquet data containing questions, gold SQL queries, and `db_id` | GRPO training and reference structural coverage |
-| Target databases        | Associated SQLite databases                                  | SQL instantiation and execution-based rewards   |
-| External SQL collection | Records containing executable gold SQL; `db_id` and questions are optional | Source of SQL skeletons for augmentation        |
+COAL-SQL does not bundle any specific dataset; point the paths in `.env` and the scripts to your own data.
 
-Datasets are not bundled with this repository. Set the paths in `.env` and the scripts to your own data. See [the skeleton retrieval documentation](sql_retrieval/README.md) for the external collection's expected format.
+### 2. Coverage-Guided Augmentation
 
-### 2. Run Coverage-Guided Augmentation
-
-First, prepare the skeleton pool and retrieval index:
+Build the skeleton retrieval index, then select complementary skeletons and synthesize verified examples with the one-shot pipeline script:
 
 ```bash
-# Build the skeleton pool, FAISS index, and precomputed embeddings
+# Build skeleton pool + FAISS index + precomputed embeddings
 bash sql_retrieval/run_preprocess.sh
-```
 
-Then, select complementary skeletons and synthesize verified examples:
-
-```bash
+# Select complementary skeletons and synthesize verified question-SQL pairs
 bash data_augmentation/run_augmentation.sh
 ```
 
-The combined seed and synthesized examples form the post-training data. See [the data augmentation documentation](data_augmentation/README.md) for individual pipeline steps and configurable options.
+See [`data_augmentation/README.md`](data_augmentation/README.md) for the per-step breakdown and configurable options. The synthesized examples are merged with the seed set to form the final post-training data.
 
-### 3. Train with Failure-Driven Learning
+### 3. Training
 
-Launch GRPO training on the combined seed and CGA data, with both step-level and epoch-level FDL enabled:
+Launch the full COAL-SQL run (Coverage-Guided Augmentation data + step-level and epoch-level Failure-Driven Learning):
 
 ```bash
 bash scripts/train_coalsql.sh
 ```
 
-## Repository Structure
-
-```text
-COAL-SQL/
-├── core/                 # Shared LLM client, parallel helpers, and reward utilities
-│   └── reward/           # SQL execution and format rewards
-├── data_augmentation/    # CGA: skeleton selection and example synthesis
-├── sql_retrieval/        # Skeleton extraction, embeddings, and FAISS indexing
-├── training/             # FDL and GRPO training
-│   └── verl/             # Bundled verl backend
-├── scripts/              # Training launch scripts
-├── figures/              # README figures
-├── requirements.txt
-└── setup.py
-```
-
-The COAL-SQL training implementation is located in `training/verl/verl/coalsql/`.
-
-Detailed module documentation:
-
-- [Coverage-Guided Augmentation](data_augmentation/README.md)
-- [SQL Skeleton Retrieval](sql_retrieval/README.md)
-
 ## Citation
 
-If you use COAL-SQL in your research, please cite our paper:
+If you find COAL-SQL useful for your research, please cite our paper:
 
 ```bibtex
 @article{cai2026coal,
